@@ -69,6 +69,38 @@ defmodule AdventOfCode.Day02 do
 
   defp pop_color(<<>>, []), do: @end_of_game
 
-  def part2(_args) do
+  def part2(input) do
+    input
+    |> String.split("\n")
+    |> Stream.reject(&(String.trim(&1) == ""))
+    |> Stream.map(fn line ->
+      [_game_no_str, game_str] = String.split(line, ":", parts: 2)
+
+      {red, green, blue} = get_info(game_str)
+
+      red * green * blue
+    end)
+    |> Enum.sum()
+  end
+
+  defp get_info(game_str, info \\ {0, 0, 0})
+
+  defp get_info(game_str, {red, green, blue}) do
+    case pop_color(game_str) do
+      {{:red, count}, rest_str} when count > red ->
+        get_info(rest_str, {count, green, blue})
+
+      {{:green, count}, rest_str} when count > green ->
+        get_info(rest_str, {red, count, blue})
+
+      {{:blue, count}, rest_str} when count > blue ->
+        get_info(rest_str, {red, green, count})
+
+      @end_of_game ->
+        {red, green, blue}
+
+      {{_color, _count}, rest_str} ->
+        get_info(rest_str, {red, green, blue})
+    end
   end
 end
